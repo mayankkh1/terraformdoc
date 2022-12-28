@@ -139,7 +139,7 @@
     
 - I am using the shared configuration and credentials for configure and authentication aws provider. 
 
-- After that add the network file(network.tf) for creating VPC and subnets.
+- Create the network file(network.tf) for creating VPC and subnets.
 
   First we need to add the variables in variable.tf file to use in network file.
   
@@ -233,7 +233,50 @@
   }
   
   ```  
-    
+
+- Create the EC2 instance with instance.tf file 
+  
+  First we need to add the variables in variable.tf file for use them in instance.tf file.
+  
+  ```
+  variable "instance_type" {
+    type        = string
+    description = "Type for EC2 Instance"
+    default     = "t2.micro"
+  }
+
+  variable "instance_count" {
+    type        = string
+    description = "No of instance"
+    default     = 1
+  }
+
+  variable "ami_id" {
+    type        = string
+    description = "AMI for centod Image"
+    default     = "ami-0763cf792771fe1bd"
+  }
+
+
+  variable "Key_name" {
+    type        = string
+    description = "Key for Centos Machine"
+    default     = " test"
+  }
+  ```
+  
+  Now create the instance file and add the below lines for creating the EC2 instance through terraform.
+  
+  ```
+  resource "aws_instance" "vm" {
+  count                  = var.instance_count
+  ami                    = var.ami_id
+  subnet_id              = aws_subnet.subnet[(count.index % var.vpc_subnet_count)].id
+  instance_type          = var.instance_type
+  vpc_security_group_ids = [aws_security_group.sg.id]
+  key_name               = var.Key_name
+  }
+  ```
   
 
  
