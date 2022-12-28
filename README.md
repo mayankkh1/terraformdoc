@@ -278,7 +278,16 @@
   }
   ```
   
-
+  Note: In this we have use resources(subnet_id and vpc_security_group_ids) of network file
+  
+  Once the above files are created we need to run the below command of terraform to create the resources in aws.
+  
+  ```terraform init```
+  
+  ```terraform plan```
+  
+  ```terraform apply```
+  
  
 
   
