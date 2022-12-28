@@ -284,7 +284,7 @@
   
   ```terraform init```
   
-  This is the first command you should use to initialize the working directory and installed required plugins.
+  - This is the first command you should use to initialize the working directory and installed required plugins.
   
   ```terraform plan```
   
