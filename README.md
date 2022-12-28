@@ -78,7 +78,35 @@
   
 #### Step-3: Once visual studio installed. You need to install the extension of terraform in visual studio.
 
-#### Step-4: 
+#### Step-4:  Launch an ec2 instance from terraform
+
+- For creating the ec2 instance through terraform we need a provider to connect with aws.
+  
+  ```
+  A provider in Terraform is a plugin that enables interaction with an API. This includes Cloud providers such as AWS. 
+  The providers are specified in the Terraform configuration code, telling Terraform which services it needs to interact with.
+  ```
+- If you want specific version of provider use below lines in your main.tf file.
+   
+  ``` 
+  terraform {
+    required_providers {
+      aws = {
+       source  = "hashicorp/aws"
+       version = "~> 4.0"
+       }
+     }
+   }
+  
+  ``` 
+  
+- Now Configure the provider to add below lines in main.tf file.
+
+  ```
+  
+
+ 
+
   
   
   
