@@ -357,7 +357,10 @@
   }
   ``` 
   - First command is used for get the public IP and put IP in file with tee command.
-  - Second command is used to add command with cronjob. If server rebooted it will automatically update the new IP in index file.  
+    ```sudo echo  Server Ip is `dig +short myip.opendns.com @resolver1.opendns.com` | sudo tee /usr/share/nginx/html/index.html```
+  
+  - Second command is used to add command with cronjob. If server rebooted it will automatically update the new IP in index file. 
+    ```sudo echo "@reboot echo "Server Ip is this `dig +short myip.opendns.com @resolver1.opendns.com`"| sudo tee /usr/share/nginx/html/index.html" | tee -a  /var/spool/cron/root``` 
 
   
  
