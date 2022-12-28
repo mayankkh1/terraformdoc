@@ -362,10 +362,94 @@
   - Second command is used to add command with cronjob. If server rebooted it will automatically update the new IP in index file. 
     ```sudo echo "@reboot echo "Server Ip is this `dig +short myip.opendns.com @resolver1.opendns.com`"| sudo tee /usr/share/nginx/html/index.html" | tee -a  /var/spool/cron/root``` 
 
-  
  
+#### Step-6:  Create the infra using terraform modules launch ec2 instance, configure ELB, ASG
+ 
+- Module allows you to group resources together and reuse this group later, possibly many times 
 
+- We can create our custom modules or use provider module(AWS modules) which is in-build module.
+
+- You can visit the below url for in-build modules.
+
+  ```https://registry.terraform.io/namespaces/terraform-aws-modules```
+ 
+- We can use in-build modules for build the infra.
   
+  Let us create the network file as like above and use aws module rather than resources in that file.
+  
+  First we need to create variable file to use the variable in network file.
+  
+  ```
+  variable "enable_dns_hostnames" {
+    type        = bool
+    description = "Enable Dns hostname in VPC"
+    default     = true
+  }
+  
+  variable "vpc_cidr_block" {
+    type        = string
+    description = "Base CIDR block for VPC"
+    default     = "10.0.0.0/16"
+  }
+  
+  variable "map_public_ip_on_launch" {
+    type        = bool
+    description = "make public IP enable on VM"
+    default     = true
+  }
+  
+  variable "vpc_subnet_count" {
+    type        = string
+    description = "Subnet count number"
+    default     = 2
+  }
+  ``` 
+  Now create the network file as like below:  
+  
+  ```
+  data "aws_availability_zones" "available" {
+  state = "available"
+  }
+  module "vpc" {
+    source = "terraform-aws-modules/vpc/aws"
+
+    name = "my-vpc"
+    cidr = var.vpc_cidr_block
+    azs = slice(data.aws_availability_zones.available.names, 0, (var.vpc_subnet_count))
+    public_subnets = [for subnet in range(var.vpc_subnet_count) : cidrsubnet(var.vpc_cidr_block, 8, subnet)]
+    enable_nat_gateway      = false
+    map_public_ip_on_launch = var.map_public_ip_on_launch
+    enable_dns_hostnames    = var.enable_dns_hostnames
+
+    }
+  resource "aws_security_group" "sg" {
+    vpc_id = module.vpc.vpc_id
+    ingress {
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    ingress {
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+    egress {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+
+  }
+  ```
+  
+   
+  
+
   
   
 
