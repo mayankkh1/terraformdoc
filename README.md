@@ -138,7 +138,101 @@
     In config file region is mentioned and in credential file we have mentioned access key and secret key.
     
 - I am using the shared configuration and credentials for configure and authentication aws provider. 
-    
+
+- After that add the network file(network.tf) for creating VPC and subnets.
+
+  First we need to add the variables in variable.tf file to use in network file.
+  
+  ```
+  variable "enable_dns_hostnames" {
+    type        = bool
+    description = "Enable Dns hostname in VPC"
+    default     = true
+  }
+  variable "vpc_cidr_block" {
+    type        = string
+    description = "Base CIDR block for VPC"
+    default     = "10.0.0.0/16"
+  }
+  variable "vpc_subnet_count" {
+    type        = string
+    description = "Subnet count number"
+    default     = 2
+  }
+
+  ```
+  
+  Now create the network file and add the below lines for creating the network through terraform.
+
+  ```
+  data "aws_availability_zones" "available" {
+  state = "available"
+   }
+
+  resource "aws_vpc" "vpc" {
+    cidr_block           = var.vpc_cidr_block
+    enable_dns_hostnames = var.enable_dns_hostnames
+
+  }
+
+  resource "aws_internet_gateway" "igw" {
+    vpc_id = aws_vpc.vpc.id
+
+  }
+
+  resource "aws_subnet" "subnet" {
+    count                   = var.vpc_subnet_count
+    cidr_block              = cidrsubnet(var.vpc_cidr_block, 8, count.index)
+    vpc_id                  = aws_vpc.vpc.id
+    map_public_ip_on_launch = var.map_public_ip_on_launch
+    availability_zone       = data.aws_availability_zones.available.names[count.index]
+
+  }
+
+  resource "aws_route_table" "rtb" {
+    vpc_id = aws_vpc.vpc.id
+
+    route {
+
+      cidr_block = "0.0.0.0/0"
+      gateway_id = aws_internet_gateway.igw.id
+
+    }
+
+
+  }
+
+  resource "aws_route_table_association" "rtba" {
+    count          = var.vpc_subnet_count
+    subnet_id      = aws_subnet.subnet[count.index].id
+    route_table_id = aws_route_table.rtb.id
+  }
+
+  resource "aws_security_group" "sg" {
+    vpc_id = aws_vpc.vpc.id
+    ingress {
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    ingress {
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+    egress {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+
+  }
+  
+  ```  
     
   
 
