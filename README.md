@@ -296,6 +296,68 @@
   
   - The terraform apply command is the more common workflow outside of automation. 
   - If you do not pass a saved plan to the apply command, then it will perform all of the functions of plan and prompt you for approval before making the     changes.
+
+- After apply command you got EC2 instance in your aws enviroment.
+
+#### Step-5:  Deploy nginx server in EC2 instance.
+
+- For this we can add the user data for running the commands in instance. 
+  
+  We need to add the below lines for installing the nginx server in instance.tf file
+  
+  ```
+  resource "aws_instance" "vm" {
+    count                  = var.instance_count
+    ami                    = var.ami_id
+    subnet_id              = aws_subnet.subnet[(count.index % var.vpc_subnet_count)].id
+    instance_type          = var.instance_type
+    vpc_security_group_ids = [aws_security_group.sg.id]
+    key_name               = var.Key_name
+    user_data              = <<EOF
+  #! /bin/bash 
+  sudo yum install epel-release -y
+  sudo yum install bind-utils -y 
+  sudo yum install nginx -y
+  sudo systemctl start nginx
+  sudo systemctl enable nginx
+  EOF
+  ```
+ 
+#### Step-5:  Show the IP of the server in the output in console and website.
+
+- For console you need to create a output.tf file and below lines:
+  
+  ```
+  output "aws_instance_public_ip" {
+
+    value = aws_instance.vm[*].public_ip
+  }
+ 
+- If you want to print the IP in website. We need to add the below lines in user data
+  
+  ```
+  resource "aws_instance" "vm" {
+    count                  = var.instance_count
+    ami                    = var.ami_id
+    subnet_id              = aws_subnet.subnet[(count.index % var.vpc_subnet_count)].id
+    instance_type          = var.instance_type
+    vpc_security_group_ids = [aws_security_group.sg.id]
+    key_name               = var.Key_name
+    user_data              = <<EOF
+  #! /bin/bash
+  sudo yum install epel-release -y
+  sudo yum install bind-utils -y 
+  sudo yum install nginx -y
+  sudo systemctl start nginx
+  sudo systemctl enable nginx
+  sudo rm /usr/share/nginx/html/index.html
+  sudo echo  Server Ip is `dig +short myip.opendns.com @resolver1.opendns.com` | sudo tee /usr/share/nginx/html/index.html
+  sudo echo "@reboot echo "Server Ip is this `dig +short myip.opendns.com @resolver1.opendns.com`"| sudo tee /usr/share/nginx/html/index.html" | tee -a     /var/spool/cron/root
+  EOF
+
+  }
+
+
   
  
 
