@@ -284,9 +284,18 @@
   
   ```terraform init```
   
+  This is the first command you should use to initialize the working directory and installed required plugins.
+  
   ```terraform plan```
   
+  - The terraform plan command lets you to preview the actions which Terraform would take to modify your infrastructure, or save a speculative plan 
+    which you can apply later. 
+  - The function of terraform plan is speculative: you cannot apply it unless you save its contents and pass them to a terraform apply command. 
+  
   ```terraform apply```
+  
+  - The terraform apply command is the more common workflow outside of automation. 
+  - If you do not pass a saved plan to the apply command, then it will perform all of the functions of plan and prompt you for approval before making the     changes.
   
  
 
