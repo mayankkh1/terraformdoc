@@ -100,9 +100,46 @@
   
   ``` 
   
-- Now Configure the provider to add below lines in main.tf file.
+- After that we need to configure the provider in main.tf. For connectivity following methods are supported:
 
-  ```
+  - Static credentials
+  - Environment variables
+  - Shared credentials file
+ 
+    Static credentials can be provided by adding an access_key and secret_key in-line in the AWS provider block as like below:
+ 
+    ```
+    provider "aws" {
+    region     = "us-west-2"
+    access_key = "my-access-key"
+    secret_key = "my-secret-key"
+    }
+    ```
+   
+    Credentials can be provided through environment variables as like below:
+    
+    ```
+    export AWS_ACCESS_KEY_ID="anaccesskey"
+    export AWS_SECRET_ACCESS_KEY="asecretkey"
+    export AWS_DEFAULT_REGION="us-west-2"
+    ```
+    
+    The AWS Provider can source credentials and other settings from the shared configuration and credentials files as like below:
+    
+    ```
+    provider "aws" {
+      shared_config_files      = ["/home/ongraph/.aws/config"]
+      shared_credentials_files = ["/home/ongraph/.aws/credentials"]
+      profile                 = "default"
+    }
+    
+    ```
+ 
+    In config file region is mentioned and in credential file we have mentioned access key and secret key.
+    
+- I am using the shared configuration and credentials for configure and authentication aws provider. 
+    
+    
   
 
  
