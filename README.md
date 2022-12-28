@@ -356,7 +356,8 @@
   EOF
   }
   ``` 
- 
+  - First command is used for get the public IP and put IP in file with tee command.
+  - Second command is used to add command with cronjob. If server rebooted it will automatically update the new IP in index file.  
 
   
  
