@@ -354,9 +354,9 @@
   sudo echo  Server Ip is `dig +short myip.opendns.com @resolver1.opendns.com` | sudo tee /usr/share/nginx/html/index.html
   sudo echo "@reboot echo "Server Ip is this `dig +short myip.opendns.com @resolver1.opendns.com`"| sudo tee /usr/share/nginx/html/index.html" | tee -a     /var/spool/cron/root
   EOF
-
   }
-
+  ``` 
+ 
 
   
  
