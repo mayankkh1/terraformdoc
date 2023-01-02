@@ -717,10 +717,10 @@
     value       = aws_vpc.vpc.id
   }
 
- output "azs" {
+  output "azs" {
     description = "A list of availability zones specified as argument to this module"
     value       = var.azs
- }
+  }
 
- ```
+  ```
  
