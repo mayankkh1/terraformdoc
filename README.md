@@ -377,7 +377,7 @@
   
   Let us create the network file as like above and use aws module rather than resources in that file.
   
-  - We need to create variable file to use the variable in network file.
+  We need to create variable file to use the variable in network file.
   
   ```
   variable "enable_dns_hostnames" {
@@ -447,9 +447,9 @@
   }
   ```
   
-  - Create the EC2 instance with instance.tf file
+  Create the EC2 instance with instance.tf file
     
-    we need to add the variables in variable.tf file for use them in instance.tf file.
+  We need to add the variables in variable.tf file for use them in instance.tf file.
     
     
    
