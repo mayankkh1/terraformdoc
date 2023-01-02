@@ -979,5 +979,106 @@
  
   }
   ```
+  Also, add the deploy.sh file in same directory where main file is present
   
+  ```
+  #! /bin/bash
+  sudo yum install epel-release -y
+  sudo yum install bind-utils -y 
+  sudo yum install nginx -y
+  sudo systemctl start nginx
+  sudo systemctl enable nginx
+  sudo rm /usr/share/nginx/html/index.html
+  sudo echo  Hello world1 | sudo tee /usr/share/nginx/html/index.html
+  ```
+  
+- Now create the lb folder (lb) and create custome module for lb.
+
+  First we need to create variable file to use the variable in loadbalancer file which is present in lb folder 
+ 
+  ```
+  variable "subnets" {
+    description = "A list of subnets to associate with the load balancer"
+    type        = list(string)
+    default     = null
+  }
+
+  variable "security_groups" {
+    description = "The security groups to attach to the load balancer"
+    type        = list(string)
+    default     = []
+  }
+  variable "vpc_id" {
+    description = "VPC id where the load balancer and other resources will be deployed."
+    type        = string
+    default     = null
+  }
+
+  variable "name_prefix" {
+    description = "Naming prefix for resources"
+    type        = string
+    default     = "mywebsite"
+
+  }
+
+  variable "load_balancer_type" {
+    description = "Naming prefix for resources"
+    type        = string
+    default     = "application"
+
+  }
+  ```
+  Now create the loadbalancer file as like below in same lb folder
+  
+  ```
+  resource "aws_lb" "lb" {
+    name               = "${var.name_prefix}"
+    internal           = false
+    security_groups    = var.security_groups
+    load_balancer_type = "application"
+    subnets            = var.subnets
+    enable_deletion_protection = false
+
+  }
+
+  resource "aws_lb_target_group" "lbtg" {
+    name     = "${var.name_prefix}"
+    port     = 80
+    protocol = "HTTP"
+    vpc_id   = var.vpc_id
+  }
+
+  resource "aws_lb_listener" "lblistener" {
+    load_balancer_arn = aws_lb.lb.arn
+    port              = "80"
+    protocol          = "HTTP"
+    default_action {
+      type             = "forward"
+      target_group_arn = aws_lb_target_group.lbtg.arn
+    }
+
+  }
+  ```
+  Now create the ouput file for lb module to use the modules output in another modules:
+  
+  ```
+  output "target_group_arns"{
+         
+          value=aws_lb_target_group.lbtg.arn
+  }
+  ```
+  
+- We can use lb module in our main loadbalancer file.
+
+  Main lb file is look like below:
+  
+  ```
+  module "alb" {
+    source             = "./loadbalancermdl"
+    load_balancer_type = "application"
+    vpc_id             = module.vpc.vpc_id
+    subnets            = module.vpc.public_subnets
+    security_groups    = [aws_security_group.sg.id]
+  }
+  ```
   
