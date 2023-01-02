@@ -1091,3 +1091,45 @@
  
   All done.
 
+#### Step-7:  Create IAM, Policies & assigning to users
+
+- Create the user file and assign policiy to user.
+ 
+  First we need to create variable file for use the variable in user file.
+  
+  ```
+  variable "username" {
+    type    = list(string)
+    default = ["john", "bryan", "josh"]
+  }
+  
+  ```
+  Now create the user.tf file
+  
+  ```
+  resource "aws_iam_user" "myuser" {
+    count = length(var.username)
+    name  = element(var.username, count.index)
+  }
+
+  resource "aws_iam_user_policy" "newempuser" {
+    count  = length(var.username)
+    name   = "new"
+    user   = aws_iam_user.myuser[count.index].id
+    policy = <<EOF
+  {  
+    "Version": "2012-10-17", 
+    "Statement": [   
+       {     
+         "Effect": "Allow", 
+         "Action": [     
+            "ec2:Describe*"   
+          ],      
+          "Resource": "*"    
+          }
+     ]
+   }
+   EOF
+  }
+  ```
+  
