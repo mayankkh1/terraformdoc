@@ -565,9 +565,18 @@
  
   }
   ```
+ 
+  After that run below terraform commands for create the resources and import the module
   
+  ```terraform init```
+  ```terraform plan```
+  ```terraform apply```
   
+  All done.
   
+#### Step-7:  Create the infra using terraform custom modules launch ec2 instance, configure ELB, ASG  
+  
+  -      
   
 
 
