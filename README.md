@@ -797,4 +797,185 @@
   }
   ```
   
-- 
+- Now create the  scaling folder (asg) and create custome module for asg.
+
+  First we need to create variable file to use the variable in autoscaling file which is present in asg folder
+  
+  ```
+  variable "instance_type" {
+    type        = string
+    description = "Type for EC2 Instance"
+    default     = "t2.micro"
+  }
+
+  variable "instance_count" {
+    type        = string
+    description = "No of instance"
+    default     = 2
+  }
+
+  variable "scale_count" {
+    type        = string
+    description = "No of instance"
+    default     = 1
+  }
+
+  variable "ami_id" {
+    type        = string
+    description = "AMI for centod Image"
+    default     = "ami-0763cf792771fe1bd"
+  }
+
+
+  variable "Key_name" {
+    type        = string
+    description = "Key for Centos Machine"
+    default     = "test"
+  }
+
+  variable "name_prefix" {
+    type        = string
+    description = "Naming prefix for resources"
+    default     = "mywebsite"
+  }
+
+  variable "min_size" {
+    description = "The minimum size of the autoscaling group"
+    type        = number
+    default     = null
+  }
+
+  variable "max_size" {
+    description = "The maximum size of the autoscaling group"
+    type        = number
+    default     = null
+  }
+
+  variable "desired_capacity" {
+    description = "The number of Amazon EC2 instances that should be running in the autoscaling group"
+    type        = number
+    default      = null
+  }
+
+  variable "vpc_zone_identifier" {
+    description = "zone identifier"
+    type        = list(string)
+    default     = null
+  }
+
+  variable "user_data" {
+    description = "The Base64-encoded user data to provide when launching the instance"
+    type        = string
+    default     = null
+  }
+
+  variable "security_groups" {
+    description = "A list of security group IDs to associate"
+    type        = list(string)
+    default     = []
+  }
+
+  variable "target_group_arns" {
+    description = "A set of `aws_alb_target_group` ARNs, for use with Application or Network Load Balancing"
+    type        = list(string)
+    default     = []
+  }
+  ```
+  Note: This variables is only for default values and pass this in main scaling file.
+  
+  Now create the autoscaling file as like below in same asg folder
+  
+  ```
+  resource "aws_launch_template" "scalevm" {
+    name            = var.name_prefix
+    image_id        = var.ami_id
+    instance_type   = var.instance_type
+    user_data       = var.user_data
+    network_interfaces {
+      associate_public_ip_address = true
+      security_groups             = var.security_groups
+    }
+    key_name        =  var.Key_name
+  }
+
+  resource "aws_autoscaling_group" "scalevmgroup" {
+    count                = var.scale_count
+    min_size             = var.min_size
+    max_size             = var.max_size
+    desired_capacity     = var.desired_capacity
+    launch_template {
+      id      = aws_launch_template.scalevm.id
+      version = "$Latest"
+    }
+    target_group_arns   = var.target_group_arns
+    vpc_zone_identifier  = var.vpc_zone_identifier
+  }
+  ```
+  
+  Now create the ouput file for asg module to use the modules output in another modules:
+  
+  ```
+  output "image_id" {
+    value       = var.ami_id
+  }
+  ```
+  
+- We can use asg module in our main autoscaling file and add the parameters values in variable.
+
+  Variable file is look like below:
+  
+  ```
+  variable "scale_count" {
+    type        = string
+    description = "No of instance"
+    default     = 1
+  }
+  
+  variable "vpc_subnet_count" {
+    type        = string
+    description = "Subnet count number"
+    default     = 2
+  }
+  
+  variable "ami_id" {
+    type        = string
+    description = "AMI for centod Image"
+    default     = "ami-0763cf792771fe1bd"
+  }
+
+
+  variable "Key_name" {
+    type        = string
+    description = "Key for Centos Machine"
+    default     = "test"
+  }
+ 
+  variable "instance_type" {
+    type        = string
+    description = "Type for EC2 Instance"
+    default     = "t2.micro"
+  }
+  ```
+
+  
+
+  
+  ```   
+  module "asg" {
+    source = "./asg"
+
+    # Autoscaling group
+    name_prefix         = "myasg"
+    count               = var.scale_count
+    min_size            = 1
+    max_size            = 3
+    desired_capacity    = 2
+    vpc_zone_identifier = [module.vpc.public_subnets[(count.index % var.vpc_subnet_count)]]
+    security_groups     = [aws_security_group.sg.id]
+    ami_id              = var.ami_id
+    instance_type       = var.instance_type
+    user_data           = filebase64("deploy.sh")
+    target_group_arns   = [module.alb.target_group_arns]
+ 
+  }
+
