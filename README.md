@@ -1140,8 +1140,12 @@
   
   ```terraform apply```
 
-  If you want to create the user and assign policy only then run just below command:
+  If you want to create the user and assign policy to user only then run just below command:
  
   ```terraform apply```
  
- 
+  It will add on the userfile after run the apply command.
+
+#### Step-8: Show Hello World instead of IP on webserver using root file at root location:
+
+-  For print the Helloworld on website. We need to overwrite the file of nginx through userdata 
