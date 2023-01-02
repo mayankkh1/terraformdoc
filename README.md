@@ -522,7 +522,49 @@
   sudo rm /usr/share/nginx/html/index.html
   sudo echo  Hello world1 | sudo tee /usr/share/nginx/html/index.html
   ```
+  
+  Create loadbalancer with loadbalancer.tf file
+  
+  we need to add the variables in variable.tf file for use them in loadbalancer.tf file.
+  
+  ```
+  variable "name_prefix" {
+    type        = string
+    description = "Naming prefix for resources"
+    default     = "myweb" 
+  }
+  
+  ```
+  Now create the loadbalancer file and add the below lines for creating the loadbalancer through terraform.
+  
+  ```
+  module "alb" {
+    source             = "terraform-aws-modules/alb/aws"
+    version = "~> 8.0"
+    name               = "my-lb"
+    load_balancer_type = "application"
+    vpc_id             = module.vpc.vpc_id
+    subnets            = module.vpc.public_subnets
+    security_groups     = [aws_security_group.sg.id]
+    target_groups = [
+      {
+        name_prefix      = "${var.name_prefix}"
+        backend_protocol = "HTTP"
+        backend_port     = 80
+        target_type      = "instance"
+      }
+    ]
 
+    http_tcp_listeners = [
+      {
+        port               = 80
+        protocol           = "HTTP"
+        target_group_index = 0
+      }
+    ]
+ 
+  }
+  ```
   
   
 
