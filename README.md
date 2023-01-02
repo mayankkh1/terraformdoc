@@ -724,9 +724,9 @@
 
   ```
   
-- Now use this module in our main network file and add the parameters values in variable of custom module variable.
+- Now use this module in our main network file and add the parameters values in variable.
  
-  Before that we need to create variable file for use the variables in main network file.
+  Variable file is look like below:
   
   ```
   variable "enable_dns_hostnames" {
