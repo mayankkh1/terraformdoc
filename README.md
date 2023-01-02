@@ -723,4 +723,47 @@
   }
 
   ```
+  
+- Now use this module in our main network file and add the parameters values in variable of custom module variable.
  
+  Main network file is look like below: 
+  
+  ```
+  data "aws_availability_zones" "available" {
+    state = "available"
+  }
+
+  module "vpc" {
+    source         = "./vpc"
+    vpc_cidr_block = var.vpc_cidr_block
+    azs = slice(data.aws_availability_zones.available.names, 0, (var.vpc_subnet_count))
+    public_subnets          = [for subnet in range(var.vpc_subnet_count) : cidrsubnet(var.vpc_cidr_block, 8, subnet)]
+    map_public_ip_on_launch = var.map_public_ip_on_launch
+    enable_dns_hostnames    = var.enable_dns_hostnames
+
+  }
+  resource "aws_security_group" "sg" {
+    vpc_id = module.vpc.vpc_id
+    ingress {
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    ingress {
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+    egress {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+
+  }
+  ```
+  
