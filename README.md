@@ -631,6 +631,7 @@
     type        = list(string)
   }
   ```
+  
   Now create the network file as like below in same VPC folder
   
   ```
@@ -695,9 +696,31 @@
       cidr_blocks = ["0.0.0.0/0"]
     }
   }
+ 
+  ```
+ 
+  Now create the ouput file to use the modules output in another modules:
+  
+  ```
+  output "public_subnets" {
+    description = "List of IDs of public subnets"
+    value       = aws_subnet.subnet[*].id
+  }
+
+  output "vpc_cidr_block" {
+    description = "The CIDR block of the VPC"
+    value       = aws_vpc.vpc.cidr_block 
+  }
+
+  output "vpc_id" {
+    description = "The CIDR block of the VPC"
+    value       = aws_vpc.vpc.id
+  }
+
+ output "azs" {
+    description = "A list of availability zones specified as argument to this module"
+    value       = var.azs
+ }
+
  ```
  
-  
-  
-
-
