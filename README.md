@@ -447,13 +447,81 @@
   }
   ```
   
-  Create the EC2 instance with instance.tf file
+  Create autoscaling with scaling.tf file
     
-  We need to add the variables in variable.tf file for use them in instance.tf file.
-    
-    
-   
+  We need to add the variables in variable.tf file for use them in scaling.tf file.
   
+  ```
+  variable "instance_type" {
+    type        = string
+    description = "Type for EC2 Instance"
+    default     = "t2.micro"
+  }
+  variable "scale_count" {
+    type        = string
+    description = "No of instance"
+    default     = 1
+  }
+
+  variable "ami_id" {
+    type        = string
+    description = "AMI for centod Image"
+    default     = "ami-0763cf792771fe1bd"
+  }
+  variable "Key_name" {
+    type        = string
+    description = "Key for Centos Machine"
+    default     = "mayank"
+  }
+  variable "vpc_subnet_count" {
+    type        = string
+    description = "Subnet count number"
+    default     = 2
+  }
+
+  ```
+  Now create the scaling file and add the below lines for creating the auto scaling through terraform.
+  
+  ```
+  module "asg" {
+    source = "terraform-aws-modules/autoscaling/aws"
+
+    # Autoscaling group
+    name             = "asg"
+    count            = var.scale_count
+    min_size         = 1
+    max_size         = 3
+    desired_capacity = 1
+
+    health_check_type   = "EC2"
+    vpc_zone_identifier = [module.vpc.public_subnets[(count.index % var.vpc_subnet_count)]]
+    security_groups     = [aws_security_group.sg.id]
+
+    # Launch template
+    launch_template_name        = "myasg"
+    launch_template_description = "myasgforvm"
+    update_default_version      = true
+
+    image_id          = var.ami_id
+    instance_type     = var.instance_type
+    user_data         = filebase64("deploy.sh")
+    target_group_arns = module.alb.target_group_arns
+
+  }
+    
+  ```  
+  Now we need to enter the bash file in same directory for user data.
+  
+  ```
+  #! /bin/bash
+  sudo yum install epel-release -y
+  sudo yum install bind-utils -y 
+  sudo yum install nginx -y
+  sudo systemctl start nginx
+  sudo systemctl enable nginx
+  sudo rm /usr/share/nginx/html/index.html
+  sudo echo  Hello world1 | sudo tee /usr/share/nginx/html/index.html
+  ```
 
   
   
