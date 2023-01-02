@@ -726,6 +726,36 @@
   
 - Now use this module in our main network file and add the parameters values in variable of custom module variable.
  
+  Before that we need to create variable file for use the variables in main network file.
+  
+  ```
+  variable "enable_dns_hostnames" {
+    type        = bool
+    description = "Enable Dns hostname in VPC"
+    default     = true
+  }
+  
+  variable "vpc_cidr_block" {
+    type        = string
+    description = "Base CIDR block for VPC"
+    default     = "10.0.0.0/16"
+  }
+  
+  variable "map_public_ip_on_launch" {
+    type        = bool
+    description = "make public IP enable on VM"
+    default     = true
+
+  }
+
+  variable "vpc_subnet_count" {
+    type        = string
+    description = "Subnet count number"
+    default     = 2
+  }
+
+  ```
+  
   Main network file is look like below: 
   
   ```
@@ -767,3 +797,4 @@
   }
   ```
   
+- 
