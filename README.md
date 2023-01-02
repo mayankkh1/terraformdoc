@@ -1140,8 +1140,8 @@
   
   ```terraform apply```
 
- If you want to create the user and assign policy only then run just below command:
+  If you want to create the user and assign policy only then run just below command:
  
- ```terraform apply```
+  ```terraform apply```
  
  
