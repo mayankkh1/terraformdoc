@@ -1081,4 +1081,13 @@
     security_groups    = [aws_security_group.sg.id]
   }
   ```
+  After that run below terraform commands for create the resources and import the module
+
+  ```terraform init```
   
+  ```terraform plan```
+  
+  ```terraform apply```
+ 
+  All done.
+
