@@ -447,7 +447,7 @@
   }
   ```
   
-  Create autoscaling with scaling.tf file
+  Create autoscaling wth aws modules. 
     
   We need to add the variables in variable.tf file for use them in scaling.tf file.
   
@@ -523,7 +523,7 @@
   sudo echo  Hello world1 | sudo tee /usr/share/nginx/html/index.html
   ```
   
-  Create loadbalancer with loadbalancer.tf file
+  Create loadbalancer with aws module
   
   we need to add the variables in variable.tf file for use them in loadbalancer.tf file.
   
@@ -565,6 +565,8 @@
  
   }
   ```
+  
+  
   
   
 
