@@ -957,7 +957,7 @@
   }
   ```
 
-  
+  Main autoscaling file is look like below:  
 
   
   ```   
@@ -978,4 +978,6 @@
     target_group_arns   = [module.alb.target_group_arns]
  
   }
-
+  ```
+  
+  
