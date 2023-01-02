@@ -1093,7 +1093,7 @@
 
 #### Step-7:  Create IAM, Policies & assigning to users
 
-- Create the user file and assign policiy to user.
+- Create the user file and add the file in main directory
  
   First we need to create variable file for use the variable in user file.
   
@@ -1132,4 +1132,16 @@
    EOF
   }
   ```
+  Once the user file will created. You can run terraform commands for creating the resources from scratch:
   
+  ```terraform init```
+  
+  ```terraform plan```
+  
+  ```terraform apply```
+
+ If you want to create the user and assign policy only then run just below command:
+ 
+ ```terraform apply```
+ 
+ 
