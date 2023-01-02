@@ -576,7 +576,128 @@
   
 #### Step-7:  Create the infra using terraform custom modules launch ec2 instance, configure ELB, ASG  
   
-  -      
+- We can use custom modules for build the infra.   
+
+- Let us create the network folder (VPC) and create create custome module.
+  
+  First we need to create variable file to use the variable in network file which is present in VPC folder
+  
+  ```
+  variable "enable_dns_hostnames" {
+    type        = bool
+    description = "Enable Dns hostname in VPC"
+    default     = true
+  }
+
+  variable "vpc_cidr_block" {
+    type        = string
+    description = "Base CIDR block for VPC"
+    default     = "10.0.0.0/16"
+  }
+
+  variable "vpc_subnet_cidr_block" {
+    type        = string
+    description = "Base CIDR block for VPC"
+    default     = "10.0.0.0/24"
+  }
+
+  variable "map_public_ip_on_launch" {
+    type        = bool
+    description = "make public IP enable on VM"
+    default     = true
+
+  }
+
+  variable "vpc_subnet_count" {
+    type        = string
+    description = "Subnet count number"
+    default     = 2
+  }
+
+  variable "name_prefix" {
+    type        = string
+    description = "Naming prefix for resources"
+    default     = "mywebsite"
+  }
+
+  variable "azs" {
+    description = "A list of availability zones names or ids in the region"
+    type        = list(string)
+    default     = []
+  }
+
+  variable "public_subnets" {
+    description = "A list of availability zones names or ids in the region"
+    type        = list(string)
+  }
+  ```
+  Now create the network file as like below in same VPC folder
+  
+  ```
+  resource "aws_vpc" "vpc" {
+    cidr_block           = var.vpc_cidr_block
+    enable_dns_hostnames = var.enable_dns_hostnames
+
+  }
+
+  resource "aws_internet_gateway" "igw" {
+    vpc_id = aws_vpc.vpc.id
+
+  }
+
+  resource "aws_subnet" "subnet" {
+    count                   = var.vpc_subnet_count
+    cidr_block              = cidrsubnet(var.vpc_cidr_block, 8, count.index)
+    vpc_id                  = aws_vpc.vpc.id
+    map_public_ip_on_launch = var.map_public_ip_on_launch
+    availability_zone       = var.azs[count.index]
+
+  }
+
+  resource "aws_route_table" "rtb" {
+    vpc_id = aws_vpc.vpc.id
+
+    route {
+
+      cidr_block = "0.0.0.0/0"
+      gateway_id = aws_internet_gateway.igw.id
+
+    }
+
+
+  }
+
+  resource "aws_route_table_association" "rtba" {
+    count          = var.vpc_subnet_count
+    subnet_id      = aws_subnet.subnet[count.index].id
+    route_table_id = aws_route_table.rtb.id
+  }
+
+  resource "aws_security_group" "sg" {
+    vpc_id = aws_vpc.vpc.id
+    ingress {
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    ingress {
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+    egress {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  }
+ ```
+ 
+  
   
 
 
